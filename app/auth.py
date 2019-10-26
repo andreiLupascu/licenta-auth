@@ -6,9 +6,10 @@ from flask_jwt_extended import (
 )
 from passlib.hash import bcrypt
 import pymysql
-
+import logging
 app = Flask(__name__)
 app.config.from_envvar('FLASK_CONFIG_FILE')
+app.logger.setLevel(logging.DEBUG)
 
 jwt = JWTManager(app)
 
@@ -23,8 +24,10 @@ def login():
         token = {
             'access_token': create_access_token(identity=username),
         }
+        app.logger.info('%s has logged in.', username)
         return jsonify(token), 200
     else:
+        app.logger.info('%s has tried to log in.', username)
         return jsonify({"msg": "Bad username or password"}), 400
 
 
@@ -36,12 +39,14 @@ def verify_credentials(username, password):
                            passwd=app.config['DB_PASS'],
                            db=app.config['DB_NAME'])
     with conn.cursor(pymysql.cursors.DictCursor) as cur:
-        cur.execute('SELECT * FROM Users WHERE username = %s;', (username,))
-        db_pass = cur.fetchone()['Password']
-        cur.close()
-        conn.close()
-        return bcrypt.verify(password, db_pass)
-
+        try:
+            cur.execute('SELECT * FROM Users WHERE username = %s;', (username,))
+            db_pass = cur.fetchone()['Password']
+            cur.close()
+            conn.close()
+            return bcrypt.verify(password, db_pass)
+        except TypeError:
+            app.logger.error("Invalid password.")
 
 if __name__ == '__main__':
     app.run()
