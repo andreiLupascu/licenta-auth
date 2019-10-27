@@ -7,7 +7,9 @@ from flask_jwt_extended import (
 from passlib.hash import bcrypt
 import pymysql
 import logging
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 app.config.from_envvar('FLASK_CONFIG_FILE')
 app.logger.setLevel(logging.DEBUG)
 
