@@ -8,6 +8,7 @@ from passlib.hash import bcrypt
 import pymysql
 import logging
 from flask_cors import CORS
+import datetime
 app = Flask(__name__)
 CORS(app)
 app.config.from_envvar('FLASK_CONFIG_FILE')
@@ -22,9 +23,10 @@ def login():
     decoded_credentials = base64.b64decode(credentials).decode("utf-8")
     username = decoded_credentials.split(':', 1)[0]
     password = decoded_credentials.split(':', 1)[1]
+    expires = datetime.timedelta(days=5)
     if verify_credentials(username, password):
         token = {
-            'access_token': create_access_token(identity=username),
+            'access_token': create_access_token(identity=username, expires_delta=expires),
         }
         app.logger.info('%s has logged in.', username)
         return jsonify(token), 200
