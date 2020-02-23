@@ -9,6 +9,7 @@ import pymysql
 import logging
 from flask_cors import CORS
 import datetime
+
 app = Flask(__name__)
 CORS(app)
 app.config.from_envvar('FLASK_CONFIG_FILE')
@@ -16,8 +17,8 @@ app.logger.setLevel(logging.DEBUG)
 
 jwt = JWTManager(app)
 
-#TODO maybe change JWT expiration payload
-@app.route('/api/auth/login', methods=['POST'])
+
+@app.route('/api/auth', methods=['POST'])
 def login():
     credentials = request.json.get('credentials')
     decoded_credentials = base64.b64decode(credentials).decode("utf-8")
@@ -44,13 +45,14 @@ def verify_credentials(username, password):
                            db=app.config['DB_NAME'])
     with conn.cursor(pymysql.cursors.DictCursor) as cur:
         try:
-            cur.execute('SELECT * FROM Users WHERE username = %s;', (username,))
-            db_pass = cur.fetchone()['Password']
-            cur.close()
+            cur.execute('SELECT password FROM user WHERE username = %s;', (username,))
+            db_pass = cur.fetchone()['password']
             conn.close()
             return bcrypt.verify(password, db_pass)
         except TypeError:
+            conn.close()
             app.logger.error("Invalid password.")
+
 
 if __name__ == '__main__':
     app.run()
