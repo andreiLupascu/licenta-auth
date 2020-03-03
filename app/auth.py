@@ -1,21 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 import base64
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-)
+from flask_jwt_extended import create_access_token
 from passlib.hash import bcrypt
 import pymysql
-import logging
-from flask_cors import CORS
 import datetime
 
-app = Flask(__name__)
-CORS(app)
-app.config.from_envvar('FLASK_CONFIG_FILE')
-app.logger.setLevel(logging.DEBUG)
-
-jwt = JWTManager(app)
+app = Blueprint("auth", __name__, url_prefix="")
 
 
 @app.route('/api/auth', methods=['POST'])
@@ -29,20 +19,20 @@ def login():
         token = {
             'access_token': create_access_token(identity=username, expires_delta=expires),
         }
-        app.logger.info('%s has logged in.', username)
+        current_app.logger.info('%s has logged in.', username)
         return jsonify(token), 200
     else:
-        app.logger.info('%s has tried to log in.', username)
+        current_app.logger.info('%s has tried to log in.', username)
         return jsonify({"msg": "Bad username or password"}), 400
 
 
 def verify_credentials(username, password):
-    port = int(app.config['DB_PORT'])
-    conn = pymysql.connect(host=app.config['DB_HOST'],
+    port = int(current_app.config['DB_PORT'])
+    conn = pymysql.connect(host=current_app.config['DB_HOST'],
                            port=port,
-                           user=app.config['DB_USER'],
-                           passwd=app.config['DB_PASS'],
-                           db=app.config['DB_NAME'])
+                           user=current_app.config['DB_USER'],
+                           passwd=current_app.config['DB_PASS'],
+                           db=current_app.config['DB_NAME'])
     with conn.cursor(pymysql.cursors.DictCursor) as cur:
         try:
             cur.execute('SELECT password FROM user WHERE username = %s;', (username,))
@@ -51,8 +41,4 @@ def verify_credentials(username, password):
             return bcrypt.verify(password, db_pass)
         except TypeError:
             conn.close()
-            app.logger.error("Invalid password.")
-
-
-if __name__ == '__main__':
-    app.run()
+            current_app.logger.error("Invalid password.")
