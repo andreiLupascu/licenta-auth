@@ -1,6 +1,7 @@
+import logging
+
 from flask import Flask
 from flask_cors import CORS
-import logging
 from flask_jwt_extended import JWTManager
 
 import app.auth as auth
@@ -17,5 +18,5 @@ def create_app():
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_app().run()

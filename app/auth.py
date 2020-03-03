@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify, current_app
 import base64
-from flask_jwt_extended import create_access_token
-from passlib.hash import bcrypt
-import pymysql
 import datetime
+
+from flask import Blueprint, request, jsonify, current_app
+from flask_jwt_extended import create_access_token
+
+from app.helpers import verify_credentials
 
 app = Blueprint("auth", __name__, url_prefix="")
 
@@ -26,19 +27,5 @@ def login():
         return jsonify({"msg": "Bad username or password"}), 400
 
 
-def verify_credentials(username, password):
-    port = int(current_app.config['DB_PORT'])
-    conn = pymysql.connect(host=current_app.config['DB_HOST'],
-                           port=port,
-                           user=current_app.config['DB_USER'],
-                           passwd=current_app.config['DB_PASS'],
-                           db=current_app.config['DB_NAME'])
-    with conn.cursor(pymysql.cursors.DictCursor) as cur:
-        try:
-            cur.execute('SELECT password FROM user WHERE username = %s;', (username,))
-            db_pass = cur.fetchone()['password']
-            conn.close()
-            return bcrypt.verify(password, db_pass)
-        except TypeError:
-            conn.close()
-            current_app.logger.error("Invalid password.")
+
+
