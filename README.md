@@ -1,9 +1,9 @@
 # licenta-auth
 
-Environment variables to setup:
- | APP_SECRET_KEY | 
- | APP_DB_HOST | 
- | APP_DB_PORT | 
- | APP_DB_USER | 
- | APP_DB_NAME | 
- | APP_DB_PASS |
+
+JWT_SECRET_KEY='cheie super secreta'
+DB_HOST='localhost'
+DB_PORT='3306'
+DB_USER='root'
+DB_PASS=''
+DB_NAME='licenta'
