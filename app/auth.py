@@ -4,7 +4,7 @@ import datetime
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token
 
-from app.helpers import verify_credentials
+from app.helpers import create_jwt_payload
 
 app = Blueprint("auth", __name__, url_prefix="")
 
@@ -16,16 +16,12 @@ def login():
     username = decoded_credentials.split(':', 1)[0]
     password = decoded_credentials.split(':', 1)[1]
     expires = datetime.timedelta(days=5)
-    if verify_credentials(username, password):
+    try:
+        payload = create_jwt_payload(username, password)
         token = {
-            'access_token': create_access_token(identity=username, expires_delta=expires),
+            'access_token': create_access_token(identity=payload, expires_delta=expires),
         }
         current_app.logger.info('%s has logged in.', username)
         return jsonify(token), 200
-    else:
-        current_app.logger.info('%s has tried to log in.', username)
+    except:
         return jsonify({"msg": "Bad username or password"}), 400
-
-
-
-

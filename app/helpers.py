@@ -3,6 +3,30 @@ from flask import current_app
 from passlib.hash import bcrypt
 
 
+def create_jwt_payload(username, password):
+    if verify_credentials(username, password):
+        conn = get_connection()
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            try:
+                roles = []
+                cur.execute(
+                    'SELECT title FROM role WHERE id in ( SELECT role_id FROM conference_user_role cur WHERE '
+                    'cur.user_id = ( SELECT id FROM user WHERE username = %s));',
+                    (username,))
+                roles_dictionary = cur.fetchall()
+                for role in roles_dictionary:
+                    roles.append(role['title'])
+                conn.close()
+                payload = {
+                    "user": username,
+                    "roles": roles
+                }
+                return payload
+            except TypeError:
+                conn.close()
+                current_app.logger.error("User has no roles")
+
+
 def verify_credentials(username, password):
     conn = get_connection()
     with conn.cursor(pymysql.cursors.DictCursor) as cur:
