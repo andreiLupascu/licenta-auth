@@ -11,6 +11,35 @@ app = Blueprint("auth", __name__, url_prefix="")
 
 @app.route('/api/auth', methods=['POST'])
 def login():
+    """
+        Login endpoint
+        ---
+        parameters:
+          - name: credentials
+            in: body
+            required: true
+            schema:
+                id:
+                properties:
+                    credentials:
+                        type: string
+                        example: username:password encoded to base64
+        responses:
+          200:
+            description: returns json with JWT in the access_token field
+            schema:
+                id:
+                properties:
+                    access_token:
+                        type: string
+          400:
+            description: returns error message
+            schema:
+                id:
+                properties:
+                    msg:
+                        type: string
+    """
     credentials = request.json.get('credentials')
     decoded_credentials = base64.b64decode(credentials).decode("utf-8")
     username = decoded_credentials.split(':', 1)[0]
@@ -30,5 +59,33 @@ def login():
 @app.route("/api/auth", methods=['GET'])
 @jwt_required
 def get_user_permissions():
+    """
+            Roles per user endpoint
+            This endpoint expects Authorization header set to -Bearer \"token\"- and returns the roles for that user
+            ---
+            parameters:
+              - name: authorization
+                in: headers
+                type: string
+                required: true
+                schema:
+                    id:
+                    properties:
+                        authorization:
+                            type: string
+            responses:
+              200:
+                description: roles for given user
+                schema:
+                    id:
+                    properties:
+                        roles:
+                            type: string
+                            enum:
+                                    - ADMINISTRATOR
+                                    - ORGANISER
+                                    - USER
+                            example: [ADMINISTRATOR, ORGANISER]
+        """
     current_user = get_jwt_identity()
     return jsonify({"roles": current_user['roles']}), 200
