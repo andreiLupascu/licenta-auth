@@ -15,6 +15,7 @@ def get_user_roles(username):
             roles_dictionary = cur.fetchall()
             for role in roles_dictionary:
                 roles.append(role['title'])
+            conn.close()
             return roles
         except TypeError:
             conn.close()
