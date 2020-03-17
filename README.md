@@ -1,9 +1,1 @@
-# licenta-auth
-
-
-JWT_SECRET_KEY='cheie super secreta'
-DB_HOST='localhost'
-DB_PORT='3306'
-DB_USER='root'
-DB_PASS=''
-DB_NAME='licenta'
+To see swagger specs in development mode, run the app locally and go to http://localhost:5000/apidocs/#/default
