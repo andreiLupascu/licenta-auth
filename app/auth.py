@@ -15,7 +15,7 @@ def login():
         Login endpoint
         ---
         parameters:
-          - name: credentials
+          - name:
             in: body
             required: true
             schema:
