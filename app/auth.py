@@ -83,9 +83,9 @@ def get_user_permissions():
                             type: string
                             enum:
                                     - ADMINISTRATOR
-                                    - ORGANISER
+                                    - PROGRAM_COMMITTEE
                                     - USER
-                            example: [ADMINISTRATOR, ORGANISER]
+                            example: [ADMINISTRATOR, PROGRAM_COMMITTEE]
         """
     current_user = get_jwt_identity()
     return jsonify({"roles": current_user['roles']}), 200
