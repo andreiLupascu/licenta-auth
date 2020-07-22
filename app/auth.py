@@ -4,7 +4,7 @@ import datetime
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-from app.helpers import create_jwt_payload
+from app.helpers import create_jwt_payload, update_password
 
 app = Blueprint("auth", __name__, url_prefix="")
 
@@ -89,3 +89,10 @@ def get_user_permissions():
         """
     current_user = get_jwt_identity()
     return jsonify({"roles": current_user['roles']}), 200
+
+
+@app.route("/api/auth", methods=['PUT'])
+@jwt_required
+def change_password():
+    msg, status_code = update_password(request.json, get_jwt_identity())
+    return jsonify({"msg": msg}), status_code
